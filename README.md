@@ -2,6 +2,14 @@
 
 A real-time project management app with Kanban boards, team collaboration, and activity tracking. Built as a production reference architecture.
 
+## Why I Built This
+
+**The Problem:** Tools like Jira and Asana are bloated, expensive ($10-25/user/month), and overkill for small teams. Self-hosted alternatives like Taiga or Wekan lack real-time collaboration — if two people are looking at the same board, one person's changes don't show up until the other refreshes. Teams end up with outdated views and duplicated work.
+
+**The Solution:** A lightweight, real-time task manager where drag-and-drop on the Kanban board instantly syncs across all connected browsers via WebSocket. Full-text search across tasks and comments, @mention notifications, and file attachments — without the enterprise bloat. Self-hostable with a single `docker compose up`.
+
+**Built as a reference architecture** demonstrating how to wire together a modern full-stack app: React frontend with drag-and-drop, FastAPI backend with WebSocket real-time sync, PostgreSQL with full-text search indexes, and Redis for pub/sub. Every pattern here is production-tested.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         Architecture                                │
