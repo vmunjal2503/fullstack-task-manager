@@ -1,138 +1,126 @@
-# Full-Stack Task Manager — React + FastAPI + PostgreSQL
+# Full-Stack Task Manager
 
-A real-time project management app with Kanban boards, team collaboration, and activity tracking. Built as a production reference architecture.
+**A Kanban board (like Trello) where drag-and-drop updates appear instantly on everyone's screen — built with React, FastAPI, and WebSockets.**
 
-## Why I Built This
+---
 
-**The Problem:** Tools like Jira and Asana are bloated, expensive ($10-25/user/month), and overkill for small teams. Self-hosted alternatives like Taiga or Wekan lack real-time collaboration — if two people are looking at the same board, one person's changes don't show up until the other refreshes. Teams end up with outdated views and duplicated work.
+## What is this?
 
-**The Solution:** A lightweight, real-time task manager where drag-and-drop on the Kanban board instantly syncs across all connected browsers via WebSocket. Full-text search across tasks and comments, @mention notifications, and file attachments — without the enterprise bloat. Self-hostable with a single `docker compose up`.
-
-**Built as a reference architecture** demonstrating how to wire together a modern full-stack app: React frontend with drag-and-drop, FastAPI backend with WebSocket real-time sync, PostgreSQL with full-text search indexes, and Redis for pub/sub. Every pattern here is production-tested.
+A project management app with a drag-and-drop board:
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Architecture                                │
-│                                                                     │
-│  ┌──────────────────────────┐       ┌────────────────────────────┐  │
-│  │   Frontend (React + TS)  │       │   Backend (FastAPI)        │  │
-│  │                          │ REST  │                            │  │
-│  │  ┌─────────────────────┐ │──────▶│  • CRUD APIs              │  │
-│  │  │   Kanban Board      │ │ API   │  • WebSocket (live sync)  │  │
-│  │  │   ┌───┐ ┌───┐ ┌───┐│ │◀──────│  • File uploads (S3)     │  │
-│  │  │   │To │ │In │ │Don││ │       │  • Activity logging       │  │
-│  │  │   │Do │ │Pro││ │e  ││ │ WS    │  • Search (full-text)    │  │
-│  │  │   │   │ │   ││ │   ││ │◀────▶│  • Export (CSV/PDF)      │  │
-│  │  │   └───┘ └───┘ └───┘│ │       │                            │  │
-│  │  └─────────────────────┘ │       └────────────┬───────────────┘  │
-│  │                          │                    │                   │
-│  │  • Drag & drop tasks     │       ┌────────────▼───────────────┐  │
-│  │  • Real-time updates     │       │   PostgreSQL + Redis       │  │
-│  │  • Filter & search       │       │                            │  │
-│  │  • Dark/Light mode       │       │  • Full-text search index  │  │
-│  │  • Responsive design     │       │  • WebSocket pub/sub      │  │
-│  └──────────────────────────┘       └────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────┘
+┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐
+│   To Do    │  │ In Progress│  │   Review   │  │    Done    │
+│            │  │            │  │            │  │            │
+│ ┌────────┐ │  │ ┌────────┐ │  │            │  │ ┌────────┐ │
+│ │Design  │ │  │ │Build   │ │  │            │  │ │Setup   │ │
+│ │homepage│ │  │ │REST API│ │  │            │  │ │Docker  │ │
+│ │ 🔴 high│ │  │ │ 🔴 high│ │  │            │  │ │ 🟢 low │ │
+│ └────────┘ │  │ └────────┘ │  │            │  │ └────────┘ │
+│ ┌────────┐ │  │            │  │            │  │            │
+│ │Setup   │ │  │            │  │            │  │            │
+│ │CI/CD   │ │  │            │  │            │  │            │
+│ │ 🟡 med │ │  │            │  │            │  │            │
+│ └────────┘ │  │            │  │            │  │            │
+└────────────┘  └────────────┘  └────────────┘  └────────────┘
 ```
 
-## Features
+When you drag a task from "To Do" to "In Progress", everyone else looking at the same board sees it move **instantly** — no page refresh needed. That's the WebSocket real-time sync.
 
-### Task Management
-- [x] Create, edit, delete tasks with rich text descriptions
-- [x] Kanban board with drag-and-drop between columns
-- [x] Custom columns (To Do, In Progress, Review, Done — or your own)
-- [x] Priority levels (Critical, High, Medium, Low)
-- [x] Due dates with overdue highlighting
-- [x] Labels/tags for categorization
-- [x] Assignee management
+---
 
-### Project Organization
-- [x] Multiple projects with separate boards
-- [x] Project-level settings and member access
-- [x] Activity feed (who did what, when)
-- [x] Dashboard with analytics (tasks completed, velocity, burndown)
+## What problem does this solve?
 
-### Collaboration
-- [x] Real-time updates via WebSocket (instant sync across browsers)
-- [x] Comments on tasks with @mentions
-- [x] File attachments (images, docs)
-- [x] Email notifications on assignment/mention
+**Without this:** Your team uses Jira ($10/user/month) or a whiteboard. With most self-hosted alternatives, if Alice drags a task on her screen, Bob doesn't see it until he refreshes. People work on the same task without knowing. Tasks get lost.
 
-### Search & Export
-- [x] Full-text search across tasks, comments, and descriptions
-- [x] Advanced filters (status, priority, assignee, date range)
-- [x] Export to CSV
-- [x] Export to PDF report
+**With this:** Changes sync in real-time across all browsers. You can search across all tasks and comments instantly. It's self-hosted (your data stays on your server) and free. One `docker compose up` and it's running.
 
-## Tech Stack
+---
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 18, TypeScript, Tailwind CSS, React DnD, React Query |
-| Backend | FastAPI, Python 3.12, SQLAlchemy 2.0, WebSockets |
-| Database | PostgreSQL 16 (full-text search), Redis (WebSocket pub/sub) |
-| Storage | AWS S3 (file attachments) |
-| Infra | Docker Compose, GitHub Actions |
+## What can you do with it?
 
-## Quick Start
+| Feature | How it works |
+|---------|-------------|
+| **Kanban board** | Drag tasks between columns (To Do → In Progress → Done) |
+| **Real-time sync** | Uses WebSocket — changes appear instantly on all connected browsers |
+| **Multiple projects** | Each project has its own board with custom columns |
+| **Task details** | Title, description, priority (critical/high/medium/low), due date, labels |
+| **Comments** | Comment on tasks, @mention teammates to notify them |
+| **Search** | Type a keyword → finds matching tasks and comments instantly (PostgreSQL full-text search) |
+| **Assign people** | Assign tasks to team members, filter board by assignee |
+
+---
+
+## How to use it
 
 ```bash
 # 1. Clone
 git clone https://github.com/vmunjal2503/fullstack-task-manager.git
 cd fullstack-task-manager
 
-# 2. Set up environment
+# 2. Configure
 cp .env.example .env
 
 # 3. Start
 docker compose up -d
 
-# 4. Run migrations
-docker compose exec backend alembic upgrade head
-
-# 5. Seed sample data
-docker compose exec backend python -m app.seed
-
-# Frontend: http://localhost:3000
-# API docs: http://localhost:8000/docs
+# 4. Open
+# App:       http://localhost:3000
+# API docs:  http://localhost:8000/docs
 ```
 
-## Project Structure
+---
+
+## How does the real-time sync work?
+
+```
+Alice's browser ◀──── WebSocket ────▶ Server ◀──── WebSocket ────▶ Bob's browser
+      │                                 │                                │
+      │  Alice drags "Build API"        │                                │
+      │  from "To Do" to "In Progress"  │                                │
+      │                                 │                                │
+      │  ──── sends event ────────────▶ │                                │
+      │                                 │  ──── broadcasts to Bob ─────▶ │
+      │                                 │                                │
+      │                                 │                   Bob sees the │
+      │                                 │                   task move    │
+      │                                 │                   instantly    │
+```
+
+No polling. No refreshing. Instant.
+
+---
+
+## How is the code organized?
 
 ```
 fullstack-task-manager/
-├── frontend/                  # React application
-│   ├── src/
-│   │   ├── components/        # KanbanBoard, TaskCard, TaskModal, etc.
-│   │   ├── pages/             # Dashboard, Projects, Board, Settings
-│   │   ├── hooks/             # useTasks, useProjects, useWebSocket
-│   │   └── lib/               # API client, types, utilities
-│   └── public/
-├── backend/                   # FastAPI application
-│   ├── app/
-│   │   ├── api/               # tasks, projects, comments, search
-│   │   ├── models/            # SQLAlchemy models
-│   │   └── services/          # Business logic, WebSocket manager
-│   └── migrations/
-├── docker-compose.yml
-└── .github/workflows/
+├── frontend/                          # What the user sees
+│   ├── src/components/KanbanBoard.tsx # The drag-and-drop board
+│   ├── src/hooks/useWebSocket.ts      # Connects to server for real-time updates
+│   ├── src/pages/index.tsx            # Dashboard with project overview
+│   └── src/lib/api.ts                 # Talks to the backend
+│
+├── backend/                           # The brain
+│   ├── app/api/projects.py            # Create projects, get board data
+│   ├── app/api/tasks.py               # Create/edit/move/delete tasks
+│   ├── app/api/comments.py            # Add comments with @mentions
+│   ├── app/api/search.py              # Full-text search across everything
+│   ├── app/api/websocket.py           # Real-time connection handler
+│   ├── app/services/ws_manager.py     # Tracks who's connected, broadcasts changes
+│   └── app/models/task.py             # Database tables (Project, Column, Task, Comment)
+│
+├── docker-compose.yml                 # Starts everything: frontend + backend + PostgreSQL + Redis
+└── .env.example
 ```
 
-## API Endpoints
+---
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/projects` | List all projects |
-| POST | `/api/projects` | Create project |
-| GET | `/api/projects/{id}/board` | Get Kanban board |
-| GET | `/api/tasks` | List/filter tasks |
-| POST | `/api/tasks` | Create task |
-| PATCH | `/api/tasks/{id}` | Update task (status, assignee, etc.) |
-| PATCH | `/api/tasks/{id}/move` | Move task between columns |
-| POST | `/api/tasks/{id}/comments` | Add comment |
-| GET | `/api/search?q=...` | Full-text search |
-| GET | `/api/export/csv?project_id=...` | Export to CSV |
-| WS | `/ws/{project_id}` | Real-time board updates |
+## Who is this for?
+
+- Small teams that want a free, self-hosted alternative to Trello/Jira
+- Developers learning how to build real-time apps with WebSockets
+- Anyone who wants to see how a modern full-stack app is structured (React + FastAPI + PostgreSQL)
 
 ---
 
