@@ -128,4 +128,4 @@ fullstack-task-manager/
 
 ---
 
-Built by **[Difiboffins Technologies](https://digiboffins.com)** — Principal SRE: Vikas Munjal | Open source under MIT License
+Built by **Vikas Munjal** | Open source under MIT License
